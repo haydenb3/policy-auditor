@@ -89,28 +89,36 @@ export default function Home() {
   const handleSocketMessage = (data: SocketMessage) => {
     switch (data.type) {
       case 'status':
-        setState(prevState => ({ ...prevState, status: data.message }));
+        if (data.message) {
+          setState(prevState => ({ ...prevState, status: data.message! }));
+        }
         break;
       case 'questions_found':
-        setState(prevState => ({
-          ...prevState,
-          totalQuestions: data.count,
-          status: `${data.count} questions found. Starting analysis...`,
-        }));
+        if (data.count !== undefined) {
+          setState(prevState => ({
+            ...prevState,
+            totalQuestions: data.count!,
+            status: `${data.count} questions found. Starting analysis...`,
+          }));
+        }
         break;
       case 'result':
-        setState(prevState => ({
-          ...prevState,
-          // Sort results by question number to ensure they appear in order.
-          questions: [...prevState.questions, data.data].sort((a, b) => {
-            const numA = parseInt(a.question.split('.')[0]);
-            const numB = parseInt(b.question.split('.')[0]);
-            return numA - numB;
-          }),
-        }));
+        if (data.data) {
+          setState(prevState => ({
+            ...prevState,
+            // Sort results by question number to ensure they appear in order.
+            questions: [...prevState.questions, data.data!].sort((a, b) => {
+              const numA = parseInt(a.question.split('.')[0]);
+              const numB = parseInt(b.question.split('.')[0]);
+              return numA - numB;
+            }),
+          }));
+        }
         break;
       case 'error':
-        setState(prevState => ({ ...prevState, error: data.message, isLoading: false }));
+        if (data.message) {
+          setState(prevState => ({ ...prevState, error: data.message!, isLoading: false }));
+        }
         break;
     }
   };
