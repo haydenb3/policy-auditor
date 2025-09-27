@@ -28,6 +28,22 @@ app.add_middleware(
 
 # --- Business Logic ---
 
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """
+    Extracts the full text content from a given PDF file.
+    Used during build time to pre-process all policy documents.
+    """
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            full_text = " ".join(page.extract_text() for page in pdf.pages if page.extract_text())
+            # Clean up the text
+            full_text = re.sub(r'Page\s+\d+\s+of\s+\d+', '', full_text)
+            full_text = re.sub(r'\s+', ' ', full_text).strip()
+            return full_text
+    except Exception as e:
+        print(f"❌ Error processing PDF {pdf_path}: {e}")
+        return ""
+
 def extract_questions_from_pdf(pdf_path: str) -> list[str]:
     """
     Extracts and cleans audit questions from a given PDF file.
