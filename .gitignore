@@ -1,0 +1,21 @@
+# Frontend (Next.js)
+/frontend/node_modules
+/frontend/.next/
+/frontend/out/
+/frontend/.DS_Store
+/frontend/.env.local
+/frontend/.env*.local
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/*.tsbuildinfo
+
+# Python / Backend
+backend/__pycache__/
+backend/venv/
+*.pyc
+
+# General
+.DS_Store
+.vscode/
+.idea/
