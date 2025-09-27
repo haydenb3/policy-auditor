@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Copy the policy documents for content extraction
-COPY "Public Policies" "/app/Public Policies/"
+COPY Public\ Policies /app/Public\ Policies/
 
 # Extract PDF content during build
 RUN python3 -c "\
