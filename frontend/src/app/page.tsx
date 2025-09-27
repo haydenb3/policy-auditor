@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { AppState } from './types';
+import { AppState, SocketMessage } from './types';
 import FileUploadForm from './components/FileUploadForm';
 import StatusDisplay from './components/StatusDisplay';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -86,7 +86,7 @@ export default function Home() {
   /**
    * Handles incoming messages from the WebSocket and updates the application state.
    */
-  const handleSocketMessage = (data: any) => {
+  const handleSocketMessage = (data: SocketMessage) => {
     switch (data.type) {
       case 'status':
         setState(prevState => ({ ...prevState, status: data.message }));

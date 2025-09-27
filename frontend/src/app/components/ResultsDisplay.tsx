@@ -58,7 +58,7 @@ const ResultsDisplay = ({ questions, totalQuestions }: ResultsDisplayProps) => {
                   <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Relevant Sections</h4>
                   <ul className="list-disc list-inside space-y-2 text-sm text-gray-700 bg-gray-50 p-3 rounded">
                     {q.relevant_sections.map((section, i) => (
-                      <li key={i} className="leading-snug">"{section}"</li>
+                      <li key={i} className="leading-snug">&ldquo;{section}&rdquo;</li>
                     ))}
                   </ul>
                 </div>

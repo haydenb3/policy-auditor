@@ -17,3 +17,10 @@ export interface AppState {
   error: string | null;
   totalQuestions: number;
 }
+
+export interface SocketMessage {
+  type: 'status' | 'questions_found' | 'result' | 'error';
+  message?: string;
+  count?: number;
+  data?: AuditQuestion;
+}
