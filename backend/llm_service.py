@@ -8,12 +8,12 @@ import re
 from typing import List, Dict, Any
 import google.generativeai as genai
 from dotenv import load_dotenv
-from backend.docs import DOCUMENTS
+from docs import DOCUMENTS
 
 # Configure the generative AI model
 def configure_genai():
     """Loads the Google AI API key and configures the genai module."""
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+    load_dotenv()
     api_key = os.getenv("GOOGLE_AI_API_KEY")
     if not api_key:
         raise ValueError("GOOGLE_AI_API_KEY not found in environment variables.")

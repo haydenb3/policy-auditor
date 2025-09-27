@@ -7,7 +7,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import pdfplumber
 
-from backend.llm_service import analyzer
+from llm_service import analyzer
 
 # --- FastAPI App Initialization ---
 
