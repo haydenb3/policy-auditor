@@ -1,7 +1,7 @@
 import os
 import json
 import sys
-from main import extract_text_from_pdf
+from pdf_utils import extract_text_from_pdf
 
 pdf_dir = '/app/Public Policies'
 content_dir = '/app/policy_content'
