@@ -1,20 +1,23 @@
 ## Healthcare Policy Compliance Auditor
 
-This is an AI-powered application designed to automate the process of auditing healthcare policy documents. It uses a Large Language Model (LLM) to analyze audit questions against a large corpus of policy documents and determine compliance.
+An AI-powered application to automate healthcare policy document auditing. It uses a Large Language Model (LLM) to analyze audit questions against a corpus of policy documents and determine compliance.
+
+**Live Application**: policy-auditor.vercel.app
+- Simply upload your Audit Questions document there as a pdf, and it will do the rest!
 
 ### How It Works (LLM-based Matching)
 
-1.  **Question Extraction**: The user uploads a PDF containing a list of audit questions. The backend, built with FastAPI, extracts and parses these questions.
-2.  **LLM-based Document Matching**: The application sends the extracted questions along with a comprehensive list of all available policy document titles to the Gemini LLM. The LLM analyzes the semantic content of the questions and the context of the titles to identify the 1-2 most relevant policy documents for each question.
-3.  **Focused Content Analysis**: For each question, the application retrieves the full text content of only the specific documents the LLM identified as relevant.
-4.  **Final Compliance Analysis**: The question and the targeted document content are sent back to the LLM. The LLM then performs a detailed analysis to determine the compliance status ("Yes", "No", or "Uncertain"), provides a confidence score, a detailed explanation, and quotes the specific sections from the policy that support its conclusion.
-5.  **Results**: The frontend, built with Next.js, displays the comprehensive analysis for each question.
+1.  **Question Extraction**: The user uploads a PDF of audit questions. The FastAPI backend extracts and parses these questions.
+2.  **LLM-based Document Matching**: The app sends questions and a list of policy titles to the Gemini LLM, which identifies the 1-2 most relevant documents for each question.
+3.  **Focused Content Analysis**: The app retrieves the full text of only the relevant documents.
+4.  **Final Compliance Analysis**: The question and targeted document content are sent back to the LLM for a detailed analysis of compliance status ("Yes", "No", or "Uncertain"), confidence score, explanation, and supporting quotes.
+5.  **Results**: The Next.js frontend displays the analysis for each question.
 
 ### Technology Stack
 
 -   **Backend**: FastAPI, Python, Uvicorn
 -   **Frontend**: Next.js, React, TypeScript, Tailwind CSS
--   **Core AI**: Google AI with the Gemini 1.5 Flash model
+-   **Core AI**: Google AI with the Gemini 2.0 Flash model
 -   **PDF Processing**: `pdfplumber`
 
 ### Directory Structure
@@ -25,12 +28,12 @@ This is an AI-powered application designed to automate the process of auditing h
 │   ├── main.py           # FastAPI application
 │   ├── llm_service.py    # Handles all interaction with the Google AI Gemini model
 │   ├── docs.py           # Contains the list of all policy documents and their titles
-│   ├── requirements.txt  # Python dependencies
-│   └── .env              # Your environment file for the API key
+│   └── requirements.txt  # Python dependencies
 ├── frontend/
 │   ├── src/app/page.tsx  # Main Next.js frontend component
 │   └── ...
-└── start.sh              # Main script to set up and run both frontend and backend
+└── start.sh              # Main script to set up and run both frontend and backend locally
+
 ```
 
 ### Quick Start
