@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 import google.generativeai as genai
 from dotenv import load_dotenv
 from docs import DOCUMENTS
+import pdfplumber
 
 # Configure the generative AI model
 def configure_genai():
@@ -72,21 +73,26 @@ class ComplianceAnalyzer:
 
     def _extract_document_content(self, filename: str) -> str:
         """
-        Extracts the full text content from a pre-processed JSON file.
-        The content was extracted during the Docker build process.
+        Finds the specified PDF file within the 'Public Policies' directory
+        and extracts its full text content.
         """
-        content_file = os.path.join(os.path.dirname(__file__), '..', 'policy_content', filename.replace('.pdf', '.json'))
-
-        try:
-            with open(content_file, 'r') as f:
-                data = json.load(f)
-                return data.get('content', '')
-        except FileNotFoundError:
-            print(f"   ❌ Content file not found: {content_file}")
-            return f"Error: Content not available for {filename}"
-        except Exception as e:
-            print(f"   ❌ Error reading content for {filename}: {e}")
-            return f"Error: Could not read content from {filename}"
+        base_path = os.path.join(os.path.dirname(__file__), '..', 'Public Policies')
+        for root, _, files in os.walk(base_path):
+            if filename in files:
+                pdf_path = os.path.join(root, filename)
+                try:
+                    with pdfplumber.open(pdf_path) as pdf:
+                        full_text = " ".join(page.extract_text() for page in pdf.pages if page.extract_text())
+                        # Clean up the text
+                        full_text = re.sub(r'Page\s+\d+\s+of\s+\d+', '', full_text)
+                        full_text = re.sub(r'\s+', ' ', full_text).strip()
+                        return full_text
+                except Exception as e:
+                    print(f"   ❌ Error processing PDF {pdf_path}: {e}")
+                    return f"Error: Could not read content from {filename}"
+        
+        print(f"   ❌ Document not found: {filename}")
+        return f"Error: Document not found - {filename}"
 
     async def find_relevant_documents(self, question: str) -> List[str]:
         """

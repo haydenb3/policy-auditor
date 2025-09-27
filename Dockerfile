@@ -13,8 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend application code to the working directory
 COPY backend/ .
 
-# Extract PDF content during build
-RUN python3 /app/extract_content.py
+# Copy the policy documents so they are available at runtime
+COPY ["Public Policies", "/app/Public Policies/"]
+
 # Expose the port the app runs on
 EXPOSE 8000
 
