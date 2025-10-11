@@ -1,5 +1,3 @@
-// frontend/src/app/types.ts
-
 export interface AuditQuestion {
   question: string;
   documents: string[];

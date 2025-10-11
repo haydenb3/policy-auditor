@@ -1,37 +1,43 @@
 import { useState } from 'react';
-import { FileUp, SendHorizonal } from 'lucide-react';
+import { FileUp, SendHorizonal, FileText } from 'lucide-react';
 
-interface FileUploadFormProps {
+interface Props {
   handleAudit: (file: File) => void;
   isLoading: boolean;
   fileName: string | null;
   onFileSelect: (file: File | null) => void;
 }
 
-const FileUploadForm = ({ handleAudit, isLoading, fileName, onFileSelect }: FileUploadFormProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+export default function FileUploadForm({ handleAudit, isLoading, fileName, onFileSelect }: Props) {
+  const [f, setF] = useState<File | null>(null);
 
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    setSelectedFile(file);
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setF(file);
     onFileSelect(file);
   };
 
-  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (selectedFile) {
-      handleAudit(selectedFile);
+  const useExample = async () => {
+    try {
+      const res = await fetch('/Audit Questions.pdf');
+      const blob = await res.blob();
+      const file = new File([blob], 'Audit Questions.pdf', { type: 'application/pdf' });
+      setF(file);
+      onFileSelect(file);
+    } catch (err) {
+      console.error('Failed to load example PDF:', err);
     }
   };
 
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (f) handleAudit(f);
+  };
+
   return (
-    <form onSubmit={onFormSubmit} className="flex gap-6 items-start bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
-      {/* File drop area - shorter and wider */}
+    <form onSubmit={onSubmit} className="flex gap-6 items-start bg-gray-50 p-6 rounded-lg shadow-sm border">
       <div className="flex-1">
-        <label
-          htmlFor="file-upload"
-          className="flex flex-col items-ceter justify-center wn-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition-colors"
-        >
+        <label htmlFor="upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition">
           <div className="flex flex-col items-center justify-center pt-3 pb-4">
             <FileUp className="w-8 h-8 mb-2 text-gray-400" />
             <p className="mb-1 text-sm text-gray-500">
@@ -39,22 +45,30 @@ const FileUploadForm = ({ handleAudit, isLoading, fileName, onFileSelect }: File
             </p>
             <p className="text-xs text-gray-500">Audit Questions PDF</p>
           </div>
-          <input id="file-upload" name="file-upload" type="file" className="hidden" onChange={onFileChange} accept=".pdf" />
+          <input id="upload" type="file" className="hidden" onChange={onChange} accept=".pdf" />
         </label>
-  
         {fileName && (
           <div className="mt-3 text-sm font-medium text-gray-600 text-center">
-            Selected file: <span className="text-blue-600">{fileName}</span>
+            Selected: <span className="text-blue-600">{fileName}</span>
           </div>
         )}
+        <div className="mt-3 text-center">
+          <button
+            type="button"
+            onClick={useExample}
+            disabled={isLoading}
+            className="text-sm text-blue-600 hover:text-blue-700 hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto"
+          >
+            <FileText className="w-4 h-4" />
+            Use example (64 question audit pdf)
+          </button>
+        </div>
       </div>
-  
-      {/* Run Audit button */}
-      <div className="flex flex-col justify-center">
+      <div className="flex items-center">
         <button
           type="submit"
           disabled={!fileName || isLoading}
-          className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+          className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center gap-2"
         >
           <SendHorizonal className="w-4 h-4" />
           {isLoading ? 'Auditing...' : 'Run Audit'}
@@ -62,6 +76,4 @@ const FileUploadForm = ({ handleAudit, isLoading, fileName, onFileSelect }: File
       </div>
     </form>
   );
-};
-
-export default FileUploadForm;
+}

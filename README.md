@@ -1,62 +1,93 @@
 ## Healthcare Policy Compliance Auditor
 
-An AI-powered application to automate healthcare policy document auditing. It uses a Large Language Model (LLM) to analyze audit questions against a corpus of policy documents and determine compliance.
+An AI-powered application to automate healthcare policy document auditing. It uses vector embeddings and semantic search to intelligently match audit questions with relevant policy sections, then analyzes compliance using Google's Gemini LLM.
 
-**Live Application**: policy-auditor.vercel.app
-- Simply upload your Audit Questions document there as a pdf, and it will do the rest!
+**🚀 [Live Demo](https://policy-auditor.vercel.app)**
 
-### How It Works (LLM-based Matching)
+Simply upload your Audit Questions PDF and the system will automatically analyze compliance across 373+ policy documents.
 
-1.  **Question Extraction**: The user uploads a PDF of audit questions. The FastAPI backend extracts and parses these questions.
-2.  **LLM-based Document Matching**: The app sends questions and a list of policy titles to the Gemini LLM, which identifies the 1-2 most relevant documents for each question.
-3.  **Focused Content Analysis**: The app retrieves the full text of only the relevant documents.
-4.  **Final Compliance Analysis**: The question and targeted document content are sent back to the LLM for a detailed analysis of compliance status ("Yes", "No", or "Uncertain"), confidence score, explanation, and supporting quotes.
-5.  **Results**: The Next.js frontend displays the analysis for each question.
+### How It Works (Vector Embeddings + RAG)
+
+1.  **Document Preprocessing**: All policy PDFs are processed into semantic chunks, cleaned of headers/footers, and converted to vector embeddings using Google's text-embedding-004 model.
+2.  **Vector Storage**: Embeddings are stored in a FAISS index for fast similarity search across 373+ policy documents.
+3.  **Question Extraction**: The user uploads a PDF of audit questions. The FastAPI backend extracts and parses these questions.
+4.  **Intelligent Question Parsing**: Complex multi-part questions are automatically broken down into component parts using Gemini.
+5.  **Semantic Search**: Each question part is converted to a vector embedding and searched against the FAISS index to find the most relevant policy chunks.
+6.  **Context Assembly**: The most relevant chunks are assembled into a focused context for analysis.
+7.  **Final Compliance Analysis**: The question and relevant policy context are sent to Gemini for detailed compliance analysis ("Yes", "No", or "Uncertain"), confidence score, explanation, and supporting quotes.
+8.  **Results**: The Next.js frontend displays the analysis for each question.
 
 ### Technology Stack
 
 -   **Backend**: FastAPI, Python, Uvicorn
 -   **Frontend**: Next.js, React, TypeScript, Tailwind CSS
--   **Core AI**: Google AI with the Gemini 2.0 Flash model
+-   **Core AI**: Google AI with the Gemini 2.5 Flash model
+-   **Vector Search**: FAISS (Facebook AI Similarity Search)
+-   **Embeddings**: Google AI text-embedding-004 model
 -   **PDF Processing**: `pdfplumber`
+-   **Vector Storage**: FAISS index with pickle metadata
 
 ### Directory Structure
 
 ```
 .
 ├── backend/
-│   ├── main.py           # FastAPI application
-│   ├── llm_service.py    # Handles all interaction with the Google AI Gemini model
-│   ├── docs.py           # Contains the list of all policy documents and their titles
-│   └── requirements.txt  # Python dependencies
+│   ├── main.py                    # FastAPI application with WebSocket endpoints
+│   ├── llm_service.py             # Core AI logic with vector search and compliance analysis
+│   ├── preprocess.py              # Document preprocessing and FAISS index generation
+│   ├── embeddings_storage/        # FAISS index and metadata storage
+│   │   ├── combined_policy_index.index
+│   │   └── combined_metadata.pkl
+│   └── requirements.txt           # Python dependencies
 ├── frontend/
-│   ├── src/app/page.tsx  # Main Next.js frontend component
+│   ├── src/app/page.tsx           # Main Next.js frontend component
 │   └── ...
-└── start.sh              # Main script to set up and run both frontend and backend locally
+├── Public Policies/               # Source policy documents (373+ PDFs)
+└── start.sh                      # Main script to set up and run both frontend and backend locally
 
 ```
+
+### Prerequisites
+
+- Python 3.9+
+- Node.js 18+
+- Google AI API Key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Quick Start
 
 1.  **Set up Environment Variables**:
-    -   In the project's root directory, create a new file named `.env`.
-    -   Add your Google AI API key to this `.env` file. It should look like this:
-        ```
-        GOOGLE_AI_API_KEY="your-google-ai-api-key"
-        ```
+    ```bash
+    # Create .env file in backend directory
+    echo 'GOOGLE_AI_API_KEY="your-google-ai-api-key"' > backend/.env
+    ```
 
-2.  **Run the Application**:
-    -   Execute the start script from the project root:
-        ```bash
-        ./start.sh
-        ```
-    -   This will:
-        -   Create a Python virtual environment for the backend.
-        -   Install all necessary Python and Node.js dependencies.
-        -   Start the FastAPI backend server on `http://localhost:8000`.
-        -   Start the Next.js frontend server on `http://localhost:3000`.
+2.  **Generate Vector Embeddings** (First time only):
+    ```bash
+    cd backend
+    python3 preprocess.py
+    cd ..
+    ```
+    This processes all 373+ PDF files and creates a FAISS index (~5-10 minutes).
 
-3.  **Use the Auditor**:
-    -   Open your browser and navigate to `http://localhost:3000`.
-    -   Upload the `Audit Questions.pdf` file.
-    -   Click "Run Audit" and review the compliance analysis results.
+3.  **Run the Application**:
+    ```bash
+    ./start.sh
+    ```
+    This will automatically:
+    - Create Python virtual environment
+    - Install all dependencies
+    - Start backend on `http://localhost:8000`
+    - Start frontend on `http://localhost:3000`
+
+4.  **Use the App**:
+    - Open `http://localhost:3000`
+    - Upload an audit questions PDF
+    - Review the compliance analysis results
+
+### Key Features
+
+- **Intelligent Question Parsing**: Automatically breaks down complex multi-part audit questions
+- **Semantic Search**: Uses vector embeddings to find the most relevant policy sections
+- **Real-time Processing**: WebSocket-based streaming of audit results
+- **High Accuracy**: Combines semantic search with LLM analysis for precise compliance determination
+- **Scalable**: Processes 373+ policy documents efficiently using FAISS vector search
