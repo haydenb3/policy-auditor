@@ -1,5 +1,5 @@
 import os, json, re, pickle, pdfplumber, faiss, numpy as np
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -146,7 +146,7 @@ class Analyzer:
         except:
             return {"compliance_status": "Error", "explanation": "Parse error."}
 
-    async def _call(self, prompt: str, json: bool = False) -> str | None:
+    async def _call(self, prompt: str, json: bool = False) -> Optional[str]:
         try:
             config = {"max_output_tokens": 8192}
             if json:
