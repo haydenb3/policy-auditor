@@ -28,9 +28,8 @@ export default function Home() {
     setState({ ...init, fileName: f.name, isLoading: true, status: 'Connecting...' });
     if (ws.current) ws.current.close();
 
-    const url = process.env.NODE_ENV === 'development' 
-      ? 'ws://localhost:8000/ws/audit' 
-      : process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000/ws/audit';
+    const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+    const url = `${process.env.NEXT_PUBLIC_WEBSOCKET_URL}?api_key=${API_KEY}`;
     
     const socket = new WebSocket(url);
     ws.current = socket;

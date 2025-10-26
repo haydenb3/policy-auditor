@@ -1,19 +1,20 @@
 import os, tempfile
-
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
-
+from dotenv import load_dotenv
 from llm_service import analyzer
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://policy-auditor.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+load_dotenv()
 
 @app.get("/")
 def health_check():
@@ -21,7 +22,11 @@ def health_check():
 
 
 @app.websocket("/ws/audit")
-async def audit(websocket: WebSocket):
+async def audit(websocket: WebSocket, x_api_key: str = Query(...)):
+    if x_api_key != os.getenv("API_KEY"):
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
     temp_path = None
     

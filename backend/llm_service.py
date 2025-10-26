@@ -1,7 +1,8 @@
-import os, json, re, pickle, pdfplumber, faiss, numpy as np
+import os, json, re, pickle, pdfplumber, weaviate, numpy as np
 from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 from dotenv import load_dotenv
+from weaviate.auth import AuthApiKey
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
@@ -10,42 +11,42 @@ class Analyzer:
     def __init__(self, model='gemini-2.5-flash'):
         self.model = genai.GenerativeModel(model)
         self.policy_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'Public Policies'))
-        self.index = None
-        self.meta = None
-        self._load()
+        self.WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+        self.WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY")
+        self.class_name = "DocumentChunk"
+        self._connect_weaviate()
 
-    def _load(self):
-        try:
-            emb_dir = os.path.join(os.path.dirname(__file__), 'embeddings_storage')
-            idx_path = os.path.join(emb_dir, 'combined_policy_index.index')
-            meta_path = os.path.join(emb_dir, 'combined_metadata.pkl')
-            
-            if os.path.exists(idx_path) and os.path.exists(meta_path):
-                self.index = faiss.read_index(idx_path)
-                with open(meta_path, 'rb') as f:
-                    self.meta = pickle.load(f)
-        except:
-            pass
+    def _connect_weaviate(self):
+        self.client = weaviate.Client(
+            url=self.WEAVIATE_URL, 
+            auth_client_secret=AuthApiKey(api_key=self.WEAVIATE_API_KEY)
+        )
 
-    async def _search(self, query: str, k: int = 10) -> List[str]:
-        if not self.index or not self.meta:
-            return []
-        
+        if not self.client.is_ready(): 
+            raise RuntimeError("Weaviate connection failed.") 
+        return self.client
+
+    async def _search(self, query: str, k: int = 10) -> List[str]:        
         try:
             result = genai.embed_content(
                 model="models/text-embedding-004",
                 content=query,
                 task_type="RETRIEVAL_QUERY"
             )
-            emb = np.array([result['embedding']]).astype('float32')
-            _, indices = self.index.search(emb, k)
+            emb = np.array(result['embedding'], dtype='float32').tolist()
             
-            chunks = []
-            for idx in indices[0]:
-                if idx < len(self.meta['chunks']):
-                    chunks.append(self.meta['chunks'][idx])
+            response = (
+                self.client.query 
+                .get(self.class_name, ["text", "document", "chunk_id"]) 
+                .with_near_vector({"vector": emb}) 
+                .with_limit(k) 
+                .do()
+            )
+            data = response.get("data", {}).get("Get", {}).get(self.class_name, []) 
+            chunks = [item["text"] for item in data if "text" in item] 
             return chunks
-        except:
+        except Exception as e: 
+            print("Weaviate search failed:", e) 
             return []
 
     def extract_questions(self, path: str) -> List[str]:
@@ -129,7 +130,7 @@ class Analyzer:
 
         **User Question:** "{question}"
 
-        **Provided Documents:** {context}
+        **Provided Context:** {context}
         ---
 
         Return **only** the final JSON object in the specified format:
