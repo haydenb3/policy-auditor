@@ -20,3 +20,7 @@ backend/.env
 .DS_Store
 .vscode/
 .idea/
+
+/embeddings_storage
+
+/backend/testing.py
