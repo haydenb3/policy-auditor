@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://policy-auditor.vercel.app/"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,11 +22,7 @@ def health_check():
 
 
 @app.websocket("/ws/audit")
-async def audit(websocket: WebSocket, x_api_key: str = Query(...)):
-    if x_api_key != os.getenv("API_KEY"):
-        await websocket.close(code=1008)
-        return
-
+async def audit(websocket: WebSocket):
     await websocket.accept()
     temp_path = None
     
