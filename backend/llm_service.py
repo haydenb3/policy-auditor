@@ -10,7 +10,6 @@ genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
 class Analyzer:
     def __init__(self, model='gemini-2.5-flash'):
         self.model = genai.GenerativeModel(model)
-        self.policy_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'Public Policies'))
         self.WEAVIATE_URL = os.getenv("WEAVIATE_URL")
         self.WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY")
         self.class_name = "DocumentChunk"
