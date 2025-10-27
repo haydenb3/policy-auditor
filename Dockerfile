@@ -13,10 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend application code to the working directory
 COPY backend/ .
 
-# Expose the port the app runs on
-EXPOSE 8000
-
 # Run the application
-# We use 0.0.0.0 to ensure it's accessible from outside the container.
 # The port is set by Railway via the $PORT environment variable.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
