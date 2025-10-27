@@ -28,7 +28,9 @@ export default function Home() {
     setState({ ...init, fileName: f.name, isLoading: true, status: 'Connecting...' });
     if (ws.current) ws.current.close();
 
-    const url = "http://localhost:8000";
+    const url = process.env.NODE_ENV === 'development' 
+      ? 'ws://localhost:8000/ws/audit' 
+      : process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000/ws/audit';
     
     const socket = new WebSocket(url);
     ws.current = socket;
